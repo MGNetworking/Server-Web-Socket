@@ -21,30 +21,33 @@ public class Main {
         System.out.println("Start container ");
         ServerSocket serverSocket = new ServerSocket(this.port);
 
-        System.out.println("listen to request");
-        Socket socket = serverSocket.accept();
+        while (true) {
 
-        System.out.println("retrieve customer data stream");
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        String line = bufferedReader.readLine();
+            System.out.println("listen to request");
+            try (Socket socket = serverSocket.accept()) {
 
-        while (! line.isEmpty()){
-            System.out.println(line);
-            line = bufferedReader.readLine();
+                System.out.println("retrieve customer data stream");
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String line = bufferedReader.readLine();
+
+                while (!line.isEmpty()) {
+                    System.out.println(line);
+                    line = bufferedReader.readLine();
+                }
+
+                System.out.println("Create response to client ");
+                PrintWriter pr = new PrintWriter(socket.getOutputStream());
+                pr.println("HTTP/1.1 200 OK");
+                pr.println("Content-Type: text/html");
+                pr.println();  // one line break for protocole http, the header
+
+                pr.println("<html><body>");
+                pr.println("Time : " + LocalDateTime.now());
+                pr.println("</body></html>");
+
+                pr.flush();
+            }
         }
-
-        System.out.println("Create response to client ");
-        PrintWriter pr = new PrintWriter(socket.getOutputStream());
-        pr.println("HTTP/1.1 200 OK");
-        pr.println("Content-Type: text/html");
-        pr.println();  //
-
-        pr.println("<html><body>");
-        pr.println("Time : " + LocalDateTime.now());
-        pr.println("</body></html>");
-
-        pr.flush();
-
     }
 
     public static void main(String[] args) throws IOException {
