@@ -1,16 +1,20 @@
-package maxime.ghalem;
+package maxime.ghalem.container;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 
 public class Main {
 
-    private final int port;
+    private final String config;
+    private int port;
 
-    public Main(int port) {
-        this.port = port;
-        System.out.println("this port container is :" + this.port);
+    public Main(String config) throws IOException {
+        this.config = config;
+        loadPropertiesFile();
     }
 
     public void start() throws IOException {
@@ -28,8 +32,21 @@ public class Main {
         }
     }
 
+    private void loadPropertiesFile() throws IOException {
+        InputStream input = getClass().getResourceAsStream(this.config);
+
+        if (input == null) {
+            throw new RuntimeException("Unable to find file : " + this.config);
+        }
+        Properties properties = new Properties();
+        properties.load(input);
+
+        properties.forEach((key, value) -> System.out.println(key + ": " + value));
+        this.port = Integer.parseInt(properties.getProperty("port"));
+    }
+
     public static void main(String[] args) throws IOException {
-        Main container = new Main(8888);
+        Main container = new Main("/config.properties");
         container.start();
     }
 
