@@ -1,16 +1,12 @@
 package maxime.ghalem;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDateTime;
 
 public class Main {
 
-    private int port;
+    private final int port;
 
     public Main(int port) {
         this.port = port;
@@ -23,30 +19,12 @@ public class Main {
 
         while (true) {
 
-            System.out.println("listen to request");
-            try (Socket socket = serverSocket.accept()) {
-
-                System.out.println("retrieve customer data stream");
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String line = bufferedReader.readLine();
-
-                while (!line.isEmpty()) {
-                    System.out.println(line);
-                    line = bufferedReader.readLine();
-                }
-
-                System.out.println("Create response to client ");
-                PrintWriter pr = new PrintWriter(socket.getOutputStream());
-                pr.println("HTTP/1.1 200 OK");
-                pr.println("Content-Type: text/html");
-                pr.println();  // one line break for protocole http, the header
-
-                pr.println("<html><body>");
-                pr.println("Time : " + LocalDateTime.now());
-                pr.println("</body></html>");
-
-                pr.flush();
-            }
+            System.out.println("waiting for external request to create");
+            Socket socket = serverSocket.accept();
+            System.out.println("manage multi threading de socket");
+            Thread handler = new SocketManager(socket);
+            System.out.println("Creates a new thread with this start methode");
+            handler.start();
         }
     }
 
