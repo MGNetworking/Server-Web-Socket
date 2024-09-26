@@ -1,4 +1,4 @@
-# Projet de Serveur
+# Jakarta Server
 
 This project is a Java application developed from scratch that implements a server capable of handling connections using
 multithreaded sockets. It efficiently manages multiple clients simultaneously while integrating servlets to respond to
