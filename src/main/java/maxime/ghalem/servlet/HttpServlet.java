@@ -3,7 +3,7 @@ package maxime.ghalem.servlet;
 public abstract class HttpServlet {
 
     public void init(){
-        System.out.println("Initialize Http servlet");
+        System.out.println("HttpServlet init() ");
     }
 
     public void service(){ // TODO: Request, Response Object as Parameters

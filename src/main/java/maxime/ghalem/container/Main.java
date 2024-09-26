@@ -22,7 +22,6 @@ public class Main {
         this.config = config;
         this.port = port;
         this.handler = handler;
-        loadPropertiesFile();
     }
 
     /**
@@ -58,7 +57,11 @@ public class Main {
         Properties properties = new Properties();
         properties.load(input);
 
-        properties.forEach((key, value) -> this.handler.put((String) key, this.getServletInstance((String) value)));
+        properties.forEach((key, value) -> {
+            HttpServlet servlet = this.getServletInstance((String) value);
+            servlet.init();
+            this.handler.put((String) key, servlet);
+        });
 
     }
 
