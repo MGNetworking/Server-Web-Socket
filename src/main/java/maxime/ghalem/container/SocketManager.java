@@ -1,5 +1,7 @@
 package maxime.ghalem.container;
 
+import maxime.ghalem.Request;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,32 +31,48 @@ public class SocketManager extends Thread {
         System.out.println("------------------------");
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()))) {
 
-            String line = bufferedReader.readLine();
+            Request request = new Request(bufferedReader);
 
-            while (line != null && !line.isEmpty()) {
-                System.out.println(line);
-                line = bufferedReader.readLine();
+            if (!request.parse()) {
+                System.out.println("Create response to client ");
+                pr = new PrintWriter(socket.getOutputStream());
+                pr.println("HTTP/1.1 500 Internal Server Error");
+                pr.println("Content-Type: text/plain");
+                pr.println();  // one line break for protocole http, the header
+
+                pr.println("<html><body>can't process request</body></html>");
+                pr.flush();
+
+
+            } else {
+                System.out.println("Create response to client ");
+                pr = new PrintWriter(socket.getOutputStream());
+                pr.println("HTTP/1.1 200 OK");
+                pr.println("Content-Type: text/html");
+                pr.println();  // one line break for protocole http, the header
+
+                pr.println("<html><body>");
+                pr.println("Time : " + LocalDateTime.now());
+                pr.println("</body></html>");
+
+                pr.flush();
             }
 
-            System.out.println("Create response to client ");
-            pr = new PrintWriter(socket.getOutputStream());
-            pr.println("HTTP/1.1 200 OK");
-            pr.println("Content-Type: text/html");
-            pr.println();  // one line break for protocole http, the header
 
-            pr.println("<html><body>");
-            pr.println("Time : " + LocalDateTime.now());
-            pr.println("</body></html>");
-
-            pr.flush();
+            System.out.println("Methode" + request.getMethode());
+            System.out.println("Path" + request.getPath());
+            System.out.println("header ---------");
+            request.getHeaders().forEach((key, valus) -> System.out.println(key + " : " + valus));
+            System.out.println("Request Parameters ---------");
+            request.getRequesteParameters().forEach((key, valus) -> System.out.println(key + " : " + valus));
 
         } catch (IOException ioe) {
             System.out.println("an error has occurred ");
-            ioe.fillInStackTrace();
+            System.out.println(ioe.fillInStackTrace());
 
         } catch (Exception ex) {
             System.out.println("an unexpected error has occurred ");
-            ex.fillInStackTrace();
+            System.out.println(ex.fillInStackTrace());
         } finally {
             if (pr != null) {
                 pr.close();
