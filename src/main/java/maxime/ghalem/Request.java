@@ -11,12 +11,12 @@ public class Request {
     private String methode;
     private String path;
     private Map<String, String> headers;
-    private Map<String, String> requesteParameters;
+    private Map<String, String> requestParameters;
 
     public Request(BufferedReader reader) {
         this.reader = reader;
         this.headers = new HashMap<>();
-        this.requesteParameters = new HashMap<>();
+        this.requestParameters = new HashMap<>();
     }
 
     public String getMethode() {
@@ -31,15 +31,19 @@ public class Request {
         return headers;
     }
 
-    public Map<String, String> getRequesteParameters() {
-        return requesteParameters;
+    public Map<String, String> getRequestParameters() {
+        return requestParameters;
+    }
+
+    public String getRequestParameters(String name) {
+        return this.requestParameters.get(name);
     }
 
     private void parsRequestParameter(String params) { // user=max&password=123
 
         for (String param : params.split("&")) {
             String[] valuesParams = param.split("=");
-            this.requesteParameters.put(valuesParams[0], valuesParams[1]);
+            this.requestParameters.put(valuesParams[0], valuesParams[1]);
         }
     }
 
@@ -47,7 +51,7 @@ public class Request {
      * Parse the HTTP request from the input stream and extracts the method, path, headers, and request parameters.
      *
      * @return true if the request was successfully parsed and contains a valid HTTP structure (method, path, and headers),
-     *  *         false if the request is malformed or missing required components.
+     * *         false if the request is malformed or missing required components.
      * @throws IOException if an input or output exception occurs while reading the request.
      */
     public boolean parse() throws IOException {
@@ -59,10 +63,10 @@ public class Request {
             // check content parameter = GET /service?user=max&password=1234 HTTP/1.1
             if (firsLine.length != 3) return false;
 
-            // get Methode
+            // get Methode GET / POST etc ...
             this.methode = firsLine[0];
 
-            // get path and get request parameter
+            // get path / request parameter
             String url = firsLine[1];
             int index = url.indexOf("?");
 
@@ -77,6 +81,14 @@ public class Request {
             while (!(line = reader.readLine().trim()).isEmpty()) {
                 int indexReferer = line.indexOf(":");
                 this.headers.put(line.substring(0, indexReferer), line.substring(indexReferer + 1));
+            }
+
+            if ("POST".equals(this.methode)) {
+                StringBuilder builder = new StringBuilder();
+                while (reader.ready()) {
+                    builder.append((char) reader.read());
+                }
+                this.parsRequestParameter(builder.toString());
             }
 
         } else {
