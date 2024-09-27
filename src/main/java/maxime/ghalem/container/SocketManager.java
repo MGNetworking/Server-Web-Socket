@@ -1,6 +1,8 @@
 package maxime.ghalem.container;
 
 import maxime.ghalem.Request;
+import maxime.ghalem.Response;
+import maxime.ghalem.servlet.HttpServlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,13 +10,16 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class SocketManager extends Thread {
 
     Socket socket = null;
+    Map<String, HttpServlet> handler;
 
-    public SocketManager(Socket socket) {
+    public SocketManager(Socket socket, Map<String, HttpServlet> handler) {
         this.setSocket(socket);
+        this.handler = handler;
     }
 
     @Override
@@ -39,28 +44,36 @@ public class SocketManager extends Thread {
                 pr.println("HTTP/1.1 500 Internal Server Error");
                 pr.println("Content-Type: text/plain");
                 pr.println();  // one line break for protocole http, the header
-
                 pr.println("<html><body>can't process request</body></html>");
                 pr.flush();
 
-
             } else {
-                System.out.println("Create response to client ");
-                pr = new PrintWriter(socket.getOutputStream());
-                pr.println("HTTP/1.1 200 OK");
-                pr.println("Content-Type: text/html");
-                pr.println();  // one line break for protocole http, the header
 
-                pr.println("<html><body>");
-                pr.println("Time : " + LocalDateTime.now());
-                pr.println("</body></html>");
+                HttpServlet servlet = this.handler.get(request.getPath());
 
-                pr.flush();
+                if (servlet == null) {
+                    pr = new PrintWriter(socket.getOutputStream());
+                    pr.println("HTTP/1.1 404 Not Found");
+                    pr.println("Content-Type: text/html");
+                    pr.println(); // one line break for protocole http, the header
+                    pr.println("<html><body>Not Found Servlet handler in your request</body></html>");
+                    pr.flush();
+                } else {
+                    System.out.println("Create response to client ");
+                    Response response = new Response(socket.getOutputStream());
+                    PrintWriter out = response.getPrintWriter();
+                    out.println("HTTP/1.1 200 OK");
+                    out.println("Content-Type: text/html");
+                    out.println(); // one line break for protocole http, the header
+                    servlet.service(request, response);
+                    out.flush();
+                }
+
             }
 
 
             System.out.println("Methode" + request.getMethode());
-            System.out.println("Path" + request.getPath());
+            System.out.println("Path: " + request.getPath());
             System.out.println("header ---------");
             request.getHeaders().forEach((key, valus) -> System.out.println(key + " : " + valus));
             System.out.println("Request Parameters ---------");
