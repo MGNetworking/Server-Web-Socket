@@ -35,7 +35,9 @@ public class SignupServlet extends HttpServlet {
         System.out.println("SignupServlet doPost");
         PrintWriter out = response.getPrintWriter();
         out.println("<html>\n" +
-                "<body> Hello you are Signup " +
+                "<body> " +
+                "Hello " + request.getRequestParameters("fname") + " " +
+                request.getRequestParameters("lname") +
                 "</body>\n" +
                 "</html>");
     }
