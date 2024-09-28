@@ -41,4 +41,9 @@ public class SignupServlet extends HttpServlet {
                 "</body>\n" +
                 "</html>");
     }
+
+    @Override
+    public void destroy() {
+        System.out.println("SignupServlet destroy() ");
+    }
 }

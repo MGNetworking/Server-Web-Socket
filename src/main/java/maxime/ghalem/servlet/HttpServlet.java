@@ -30,4 +30,8 @@ public abstract class HttpServlet {
     public void doPost(Request request, Response response) {
         System.out.println("HttpServlet doPost");
     }
+
+    public void destroy(){
+        System.out.println("HttpServlet destroy() ");
+    }
 }

@@ -88,10 +88,15 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Main container = new Main("/config.properties", 8888, new HashMap<>());
         container.loadPropertiesFile();
-/*        container.handler.forEach((key, value) -> {
-            System.out.println(key);
-            value.doGet();
-        });*/
+
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run() {
+                container.handler.forEach((key,httpServlet) -> {
+                    httpServlet.destroy();
+                });
+            }
+        });
 
         container.start();
     }
