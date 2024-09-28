@@ -89,6 +89,7 @@ public class Main {
         Main container = new Main("/config.properties", 8888, new HashMap<>());
         container.loadPropertiesFile();
 
+        // add event when shutdown server
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override
             public void run() {
