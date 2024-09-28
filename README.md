@@ -37,7 +37,7 @@ l'expérimentation approfondie du cycle de vie des servlets.
 1. Cloner le dépôt :
 
 ````shell
-git clone https://github.com/votre-utilisateur/votre-repo.git
+git clone [le dépot]
 ````
 
 2. Compiler le projet avec Maven :
